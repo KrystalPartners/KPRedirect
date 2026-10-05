@@ -19,33 +19,22 @@ h1{font-size:25px;line-height:1.15;margin:0 0 12px}
 .num{flex:0 0 34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#0b0e14;font-weight:800}
 .txt{font-size:17px;line-height:1.35}
 .dots{font-size:25px;font-weight:900;letter-spacing:2px}
-.arrow{position:fixed;right:18px;top:max(14px,env(safe-area-inset-top));font-size:52px;animation:bounce .8s infinite alternate}
-@keyframes bounce{to{transform:translate(5px,-6px)}}
+.arrow{position:fixed;right:41px;top:max(91px,calc(env(safe-area-inset-top) + 72px));font-size:62px;line-height:1;font-weight:900;animation:bounce .75s infinite alternate}
+@keyframes bounce{from{transform:translateY(9px)}to{transform:translateY(-7px)}}
 .note{font-size:13px;color:#7f8998;margin-top:18px}
 </style>
 </head>
 <body>
 <div class="card">
-  <div class="arrow">↗</div>
+  <div class="arrow">↑</div>
   <div class="icon">🌐</div>
   <h1>Ouvre le site dans ton navigateur</h1>
   <p class="sub">Pour accéder correctement au site, ouvre cette page dans Safari, Chrome ou ton navigateur habituel.</p>
-
   <div class="steps">
-    <div class="step">
-      <div class="num">1</div>
-      <div class="txt">Appuie sur les <span class="dots">⋯</span> en haut à droite.</div>
-    </div>
-    <div class="step">
-      <div class="num">2</div>
-      <div class="txt">Choisis <b>« Ouvrir dans le navigateur »</b>.</div>
-    </div>
-    <div class="step">
-      <div class="num">3</div>
-      <div class="txt">Le site s'ouvrira ensuite dans ton navigateur.</div>
-    </div>
+    <div class="step"><div class="num">1</div><div class="txt">Appuie sur les <span class="dots">⋯</span> en haut à droite.</div></div>
+    <div class="step"><div class="num">2</div><div class="txt">Choisis <b>« Ouvrir dans le navigateur »</b>.</div></div>
+    <div class="step"><div class="num">3</div><div class="txt">Tu seras redirigé automatiquement vers le site.</div></div>
   </div>
-
   <div class="note">Safari, Chrome ou ton navigateur par défaut.</div>
 </div>
 
@@ -53,22 +42,29 @@ h1{font-size:25px;line-height:1.15;margin:0 0 12px}
 const DEST = "https://lesbonusde.com/Sabri";
 
 /*
-  La passerelle est destinée à être ouverte depuis Telegram.
-  Quand l'utilisateur choisit "Ouvrir dans le navigateur", certains clients
-  ajoutent/reforment le contexte de navigation sans fournir de signal Web
-  standard fiable permettant de distinguer cette seconde ouverture.
-
-  On tente donc une détection prudente des navigateurs externes via plusieurs
-  signaux, mais on évite toute redirection immédiate au premier chargement.
+  Important:
+  - L'URL normale est la passerelle Telegram et affiche toujours les instructions.
+  - Le menu "Ouvrir dans le navigateur" de Telegram rouvre normalement exactement
+    la même URL, sans paramètre fiable permettant au site de savoir qu'il est sorti.
+  - Pour rendre la redirection fiable sans modifier LesBonusDe, on mémorise localement
+    que la passerelle vient d'être affichée. Lors d'une réouverture immédiate du même
+    lien dans un autre contexte, on redirige.
 */
-const ua = navigator.userAgent || "";
-const standalone = window.matchMedia && window.matchMedia("(display-mode: browser)").matches;
-const ref = document.referrer || "";
+const KEY = "kp_redirect_seen_at";
+const now = Date.now();
+let previous = 0;
 
-// Paramètre explicite utilisable pour une redirection externe si nécessaire.
-const params = new URLSearchParams(location.search);
-if (params.get("go") === "1") {
+try {
+  previous = Number(localStorage.getItem(KEY) || 0);
+} catch(e) {}
+
+const recentlySeen = previous && (now - previous < 120000);
+
+if (recentlySeen) {
+  try { localStorage.removeItem(KEY); } catch(e) {}
   location.replace(DEST);
+} else {
+  try { localStorage.setItem(KEY, String(now)); } catch(e) {}
 }
 </script>
 </body>
