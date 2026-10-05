@@ -19,8 +19,8 @@ h1{font-size:25px;line-height:1.15;margin:0 0 12px}
 .num{flex:0 0 34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#0b0e14;font-weight:800}
 .txt{font-size:17px;line-height:1.35}
 .dots{font-size:25px;font-weight:900;letter-spacing:2px}
-.arrow{position:fixed;right:41px;top:max(91px,calc(env(safe-area-inset-top) + 72px));font-size:62px;line-height:1;font-weight:900;animation:bounce .75s infinite alternate}
-@keyframes bounce{from{transform:translateY(9px)}to{transform:translateY(-7px)}}
+.arrow{position:fixed;right:40px;top:max(88px,calc(env(safe-area-inset-top) + 70px));font-size:66px;line-height:1;font-weight:900;animation:bounce .75s infinite alternate}
+@keyframes bounce{from{transform:translateY(10px)}to{transform:translateY(-7px)}}
 .note{font-size:13px;color:#7f8998;margin-top:18px}
 </style>
 </head>
@@ -40,31 +40,23 @@ h1{font-size:25px;line-height:1.15;margin:0 0 12px}
 
 <script>
 const DEST = "https://lesbonusde.com/Sabri";
+const params = new URLSearchParams(location.search);
 
 /*
-  Important:
-  - L'URL normale est la passerelle Telegram et affiche toujours les instructions.
-  - Le menu "Ouvrir dans le navigateur" de Telegram rouvre normalement exactement
-    la même URL, sans paramètre fiable permettant au site de savoir qu'il est sorti.
-  - Pour rendre la redirection fiable sans modifier LesBonusDe, on mémorise localement
-    que la passerelle vient d'être affichée. Lors d'une réouverture immédiate du même
-    lien dans un autre contexte, on redirige.
+  Si Telegram ouvre l'URL courante dans Safari/Chrome, il doit reprendre ?go=1.
+  À l'arrivée dans le navigateur externe, cette condition redirige immédiatement.
 */
-const KEY = "kp_redirect_seen_at";
-const now = Date.now();
-let previous = 0;
-
-try {
-  previous = Number(localStorage.getItem(KEY) || 0);
-} catch(e) {}
-
-const recentlySeen = previous && (now - previous < 120000);
-
-if (recentlySeen) {
-  try { localStorage.removeItem(KEY); } catch(e) {}
+if (params.get("go") === "1") {
   location.replace(DEST);
 } else {
-  try { localStorage.setItem(KEY, String(now)); } catch(e) {}
+  /*
+    On affiche d'abord cette page normalement dans Telegram, puis on modifie
+    l'URL affichée SANS recharger la page. Le menu Telegram "Ouvrir dans le
+    navigateur" récupère alors l'URL courante avec ?go=1.
+  */
+  const next = new URL(location.href);
+  next.searchParams.set("go", "1");
+  history.replaceState(null, "", next.toString());
 }
 </script>
 </body>
