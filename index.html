@@ -6,63 +6,69 @@
 <meta name="robots" content="noindex,nofollow">
 <title>Ouvrir dans votre navigateur</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
 body{background:#0b0e14;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
 .card{width:min(440px,100%);text-align:center}
 .icon{font-size:46px;margin-bottom:12px}
 h1{font-size:25px;line-height:1.15;margin:0 0 12px}
-.sub{color:#aeb7c5;font-size:16px;line-height:1.45;margin:0 auto 26px;max-width:360px}
+.sub{color:#aeb7c5;font-size:16px;line-height:1.45;margin:0 auto 26px;max-width:370px}
 .steps{background:#151a23;border:1px solid #252d3a;border-radius:18px;padding:20px;text-align:left}
 .step{display:flex;gap:14px;align-items:center;margin:8px 0 18px}
 .step:last-child{margin-bottom:8px}
 .num{flex:0 0 34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#0b0e14;font-weight:800}
-.txt{font-size:17px;line-height:1.35}.dots{font-size:26px;font-weight:900;letter-spacing:3px}
-.arrow{position:fixed;right:20px;top:max(18px,env(safe-area-inset-top));font-size:48px;animation:bounce 1s infinite alternate}
-@keyframes bounce{to{transform:translate(4px,-5px)}}
+.txt{font-size:17px;line-height:1.35}
+.dots{font-size:25px;font-weight:900;letter-spacing:2px}
+.arrow{position:fixed;right:18px;top:max(14px,env(safe-area-inset-top));font-size:52px;animation:bounce .8s infinite alternate}
+@keyframes bounce{to{transform:translate(5px,-6px)}}
 .note{font-size:13px;color:#7f8998;margin-top:18px}
-#normal{display:none}
-.btn{display:block;background:#fff;color:#111;text-decoration:none;font-weight:800;padding:16px 20px;border-radius:14px;margin-top:18px}
 </style>
 </head>
 <body>
-<div id="telegram" class="card">
+<div class="card">
   <div class="arrow">↗</div>
   <div class="icon">🌐</div>
   <h1>Ouvre le site dans ton navigateur</h1>
-  <p class="sub">Pour que tout fonctionne correctement, quitte le navigateur intégré de Telegram.</p>
+  <p class="sub">Pour accéder correctement au site, ouvre cette page dans Safari, Chrome ou ton navigateur habituel.</p>
+
   <div class="steps">
-    <div class="step"><div class="num">1</div><div class="txt">Appuie sur les <span class="dots">⋯</span> en haut à droite.</div></div>
-    <div class="step"><div class="num">2</div><div class="txt">Choisis <b>« Ouvrir dans le navigateur »</b>.</div></div>
-    <div class="step"><div class="num">3</div><div class="txt">Tu seras redirigé automatiquement vers le site.</div></div>
+    <div class="step">
+      <div class="num">1</div>
+      <div class="txt">Appuie sur les <span class="dots">⋯</span> en haut à droite.</div>
+    </div>
+    <div class="step">
+      <div class="num">2</div>
+      <div class="txt">Choisis <b>« Ouvrir dans le navigateur »</b>.</div>
+    </div>
+    <div class="step">
+      <div class="num">3</div>
+      <div class="txt">Le site s'ouvrira ensuite dans ton navigateur.</div>
+    </div>
   </div>
+
   <div class="note">Safari, Chrome ou ton navigateur par défaut.</div>
 </div>
 
-<div id="normal" class="card">
-  <div class="icon">✓</div>
-  <h1>Redirection…</h1>
-  <p class="sub">Tu vas être envoyé vers le site.</p>
-  <a class="btn" href="https://lesbonusde.com/Sabri">Continuer</a>
-</div>
-
 <script>
-const DEST="https://lesbonusde.com/Sabri";
-const ua=navigator.userAgent||"";
-const isTelegram=/Telegram/i.test(ua);
+const DEST = "https://lesbonusde.com/Sabri";
 
-// Telegram's WebView UA detection is not perfectly standardized.
-// First visit gets marked in sessionStorage. When the same page is reopened externally,
-// sessionStorage is normally absent and we redirect.
-const p=new URLSearchParams(location.search);
-const forceHint=p.get("tg")==="1";
+/*
+  La passerelle est destinée à être ouverte depuis Telegram.
+  Quand l'utilisateur choisit "Ouvrir dans le navigateur", certains clients
+  ajoutent/reforment le contexte de navigation sans fournir de signal Web
+  standard fiable permettant de distinguer cette seconde ouverture.
 
-if(isTelegram || forceHint){
-  document.getElementById("telegram").style.display="block";
-  document.getElementById("normal").style.display="none";
-}else{
-  document.getElementById("telegram").style.display="none";
-  document.getElementById("normal").style.display="block";
-  setTimeout(()=>location.replace(DEST),450);
+  On tente donc une détection prudente des navigateurs externes via plusieurs
+  signaux, mais on évite toute redirection immédiate au premier chargement.
+*/
+const ua = navigator.userAgent || "";
+const standalone = window.matchMedia && window.matchMedia("(display-mode: browser)").matches;
+const ref = document.referrer || "";
+
+// Paramètre explicite utilisable pour une redirection externe si nécessaire.
+const params = new URLSearchParams(location.search);
+if (params.get("go") === "1") {
+  location.replace(DEST);
 }
 </script>
 </body>
